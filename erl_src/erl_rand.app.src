@@ -1,0 +1,10 @@
+{application, erl_rand,
+ [ {description, "tests for erl-rand library"}
+ , {vsn, "0.1"}
+ , {registered, []}
+ , {modules, []}
+ , {applications, [ kernel
+                  , stdlib
+                  ]}
+ , {env, []}
+ ]}.

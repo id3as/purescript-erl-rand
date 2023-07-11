@@ -1,0 +1,1 @@
+Wrapper round the erlang rand module. Methods being added as needed - PRs welcome!
