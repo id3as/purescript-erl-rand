@@ -1,4 +1,4 @@
-Wrapper round the erlang rand module. Most methods implemented (`rand:jump` being an exception) - PRs welcome!
+Wrapper round the erlang rand module. Most methods have been implemented (`rand:jump` being an exception) - PRs welcome!
 
 It also provides `uniformRange` and `uniformRangeS` methods, peculiarly missing from the Erlang library.
 
