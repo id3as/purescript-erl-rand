@@ -15,6 +15,7 @@ import Erl.Data.Tuple (fst, snd)
 import Erl.Process (unsafeRunProcessM)
 import Erl.Rand (Alg(..), RandState, bytes, bytesS, seed, uniform, uniformRange, uniformRangeS, uniformS, uniformTo, uniformTo', uniformToS, uniformToS')
 import Erl.Test.EUnit (TestF, TestSet, collectTests, suite, test)
+import Erl.TestHelpers (checkUnsafeCrash)
 import Partial.Unsafe (unsafeCrashWith)
 import Test.Assert (assertEqual, assertThrows, assertTrue)
 
@@ -45,9 +46,9 @@ randTests = do
       unsafeRunProcessM $ liftEffect do
         rs :: RandState <- seed (Exsss)
         let 
-          r1 = spy "r1" $ uniformS  rs
-          r2 = uniformS  $ snd r1
-          r3 = uniformS  $ snd r2
+          r1 = uniformS rs
+          r2 = uniformS $ snd r1
+          r3 = uniformS $ snd r2
         assertTrue $ fst r1 >= 0.0 && fst r1 <= 1.0
         assertTrue $ fst r2 >= 0.0 && fst r2 <= 1.0
         assertTrue $ fst r3 >= 0.0 && fst r3 <= 1.0
@@ -107,10 +108,7 @@ randTests = do
         let 
           r1 = uniformToS' 1 rs
           r2 = uniformToS' 2 $ snd r1
-          -- uniformToSEffect :: Effect _ --(Tuple2 Int RandState)
-          -- uniformToSEffect = pure $ uniformToS' 0 $ snd r2
-          
-        assertEqual $ spy "assert"{ expected: 1, actual: fst r1 }
+        assertEqual { expected: 1, actual: fst r1 }
         assertTrue $ fst r2 >= 1 && fst r2 <= 2
         crashed <- checkUnsafeCrash (\_ -> uniformToS' 0 $ snd r2)
         assertTrue crashed
@@ -125,5 +123,3 @@ unsafeFromJust message Nothing = unsafeCrashWith message
 checkCrashes :: forall a. Effect a -> Effect Boolean
 checkCrashes f =
   catchException (\_ -> pure true) $ (\_ -> false) <$> f
-
-foreign import checkUnsafeCrash :: forall a. (Unit -> a) -> Effect Boolean
