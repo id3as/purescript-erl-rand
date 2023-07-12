@@ -5,7 +5,7 @@ workspace:
   backend:
     cmd: purerl
 package:
-  dependencies: [ effect, erl-binary, erl-tuples, foreign ]
+  dependencies: [ effect, erl-binary, erl-tuples, foreign, erl-atom ]
   name: erl-rand
   test:
     dependencies: [ console, erl-lists, erl-process, erl-test-eunit ]

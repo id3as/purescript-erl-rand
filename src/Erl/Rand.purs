@@ -49,32 +49,38 @@ seed = seed_impl <<< algToAtom
 foreign import uniform :: Effect Number
 
 -- | Returns, for a specified state, random float uniformly distributed in the value range 0.0 =< X < 1.0 and a new state.
-foreign import uniformS :: RandState -> Tuple2 Int RandState
+foreign import uniformS :: RandState -> Tuple2 Number RandState
 
 foreign import uniformTo_impl :: Int -> Effect Int
 
+-- | Returns, for a specified integer N >= 1, a random integer uniformly distributed in the value range 1 =< X =< N and updates the state in the process dictionary.
 uniformTo ∷ Int → Effect (Maybe Int)
 uniformTo n | n < 1 = pure Nothing
 uniformTo n = Just <$> uniformTo_impl n
 
+-- | Unsafe version of uniformTo that crashes if the provided integer N < 1
 uniformTo' :: Int -> Effect Int
 uniformTo' = uniformTo_impl
 
 foreign import uniformToS_impl :: Int -> RandState -> Tuple2 Int RandState
 
+-- | Returns, for a specified integer N >= 1 and a state, a random integer uniformly distributed in the value range 1 =< X =< N and a new state.
 uniformToS :: Int -> RandState -> Maybe (Tuple2 Int RandState)
 uniformToS n _ | n < 1 = Nothing
 uniformToS n rs = Just $ uniformToS_impl n rs
 
+-- | Unsafe version of uniformToS that crashes if the provided integer N < 1
 uniformToS' :: Int -> RandState -> Tuple2 Int RandState
 uniformToS' = uniformToS_impl
 
+-- | Generates a random integer uniformly distributed in the range provided and updates the state in the process dictionary.
 uniformRange :: Int -> Int -> Effect Int
 uniformRange from to | from > to = uniformRange to from
 uniformRange from to = do
   rnd <- uniformTo_impl $ 1 + to - from
   pure $ rnd - 1 + from
 
+-- | Generates a random integer uniformly distributed in the range provided, along with a new state.
 uniformRangeS :: Int -> Int -> RandState -> Tuple2 Int RandState
 uniformRangeS from to rs | from > to = uniformRangeS to from rs
 uniformRangeS from to rs =
@@ -83,14 +89,6 @@ uniformRangeS from to rs =
   in
     lmap ((+) (from - 1)) res
 
--- | Returns, for a specified integer N >= 1 and a state, a random integer uniformly distributed in the value range 1 =< X =< N and a new state.
--- uniformRangeS :: Int -> Int -> RandState -> Maybe (Tuple2 Int RandState)
--- uniformRangeS from to rs = 
---   case uniformToS 
-
--- uniform/0, uniform/1, uniform_s/1, uniform_s/2,
--- uniform_real/0, uniform_real_s/1,
--- jump/0, jump/1,
 -- normal/0, normal/2, normal_s/1, normal_s/3
 
 -------------------------------------------------------------
