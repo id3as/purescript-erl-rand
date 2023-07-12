@@ -5,8 +5,12 @@ module Erl.Rand
   , bytes'
   , bytesS
   , bytesS'
+  , normal
+  , normal'
   , normal01
   , normal01S
+  , normalS
+  , normalS'
   , seed
   , uniform
   , uniformRange
@@ -62,6 +66,29 @@ bytesS' = bytesS_impl
 foreign import normal01 :: Effect Number
 -- | Returns, for a specified state, a standard normal deviate float (that is, the mean is 0 and the standard deviation is 1) and a new state.
 foreign import normal01S :: RandState -> Tuple2 Number RandState
+
+foreign import normal_impl :: Number -> Number -> Effect Number
+-- | Returns a normal N(Mean, Variance) deviate float and updates the state in the process dictionary
+normal ∷ Number -> Number -> Effect (Maybe Number)
+normal _ v | v < (0.0) = pure Nothing
+normal m v = Just <$> normal_impl m v
+
+-- | Unsafe version of normal that crashes if the provided variance < 0
+normal' :: Number -> Number -> Effect Number
+normal' = normal_impl
+
+foreign import normalS_impl :: Number -> Number -> RandState -> Tuple2 Number RandState
+
+-- | Returns, for a specified state, a standard normal deviate float (that is, the mean is 0 and the standard deviation is 1) and a new state.
+normalS :: Number -> Number -> RandState -> Maybe (Tuple2 Number RandState)
+normalS _ v _ | v < 0.0 = Nothing
+normalS m v rs = Just $ normalS_impl m v rs
+
+-- | Unsafe version of normalS that crashes if the provided variance < 0
+normalS' :: Number -> Number -> RandState -> Tuple2 Number RandState
+normalS' = normalS_impl
+
+
 
 foreign import seed_impl :: Atom -> Effect RandState
 

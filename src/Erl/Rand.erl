@@ -5,6 +5,8 @@
     bytesS_impl/2,
     normal01/0,
     normal01S/1,
+    normal_impl/2,
+    normalS_impl/3,
     seed_impl/1,
     uniform/0,
     uniformS/1,
@@ -27,6 +29,14 @@ normal01() ->
 
 normal01S(State) ->
     rand:normal_s(State).
+
+normal_impl(Mean, Variance) ->
+    fun() ->
+        rand:normal(Mean, Variance)
+    end.
+
+normalS_impl(Mean, Variance, State) ->
+    rand:normal_s(Mean, Variance, State).
 
 seed_impl(Alg) ->
     fun() ->
