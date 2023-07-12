@@ -2,7 +2,11 @@ module Erl.Rand
   ( Alg(..)
   , RandState
   , bytes
+  , bytes'
   , bytesS
+  , bytesS'
+  , normal01
+  , normal01S
   , seed
   , uniform
   , uniformRange
@@ -34,10 +38,30 @@ data Alg
 
 newtype RandState = RandState Foreign
 
+foreign import bytes_impl :: Int -> Effect Binary
 -- | Returns, for a specified integer N >= 0, a binary() with that number of random bytes
-foreign import bytes :: Int -> Effect Binary
+bytes :: Int -> Effect (Maybe Binary)
+bytes n | n < 0 = pure Nothing
+bytes n = Just <$> bytes_impl n
+
+-- | Unsafe version of bytes that crashes if provided integer N < 0
+bytes' ∷ Int → Effect Binary
+bytes' = bytes_impl
+
 -- | Returns, for a specified integer N >= 0 and a state, a binary() with that number of random bytes, and a new state
-foreign import bytesS :: Int -> RandState -> Tuple2 Binary RandState
+foreign import bytesS_impl :: Int -> RandState -> Tuple2 Binary RandState
+bytesS :: Int -> RandState -> Maybe (Tuple2 Binary RandState)
+bytesS n _ | n < 0 = Nothing
+bytesS n rs = Just $ bytesS_impl n rs
+
+-- | Unsafe version of bytes that crashes if provided integer N < 0
+bytesS' ∷ Int → RandState ->  Tuple2 Binary RandState
+bytesS' = bytesS_impl
+
+-- | Returns a standard normal deviate float (that is, the mean is 0 and the standard deviation is 1) and updates the state in the process dictionary.
+foreign import normal01 :: Effect Number
+-- | Returns, for a specified state, a standard normal deviate float (that is, the mean is 0 and the standard deviation is 1) and a new state.
+foreign import normal01S :: RandState -> Tuple2 Number RandState
 
 foreign import seed_impl :: Atom -> Effect RandState
 
@@ -88,8 +112,6 @@ uniformRangeS from to rs =
     res = uniformToS_impl (1 + to - from) rs
   in
     lmap ((+) (from - 1)) res
-
--- normal/0, normal/2, normal_s/1, normal_s/3
 
 -------------------------------------------------------------
 -- Internal helpers

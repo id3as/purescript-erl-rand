@@ -13,7 +13,7 @@ import Erl.Data.Binary (byteSize)
 import Erl.Data.List (List)
 import Erl.Data.Tuple (fst, snd)
 import Erl.Process (unsafeRunProcessM)
-import Erl.Rand (Alg(..), RandState, bytes, bytesS, seed, uniform, uniformRange, uniformRangeS, uniformS, uniformTo, uniformTo', uniformToS, uniformToS')
+import Erl.Rand (Alg(..), RandState, bytes, bytes', bytesS, bytesS', seed, uniform, uniformRange, uniformRangeS, uniformS, uniformTo, uniformTo', uniformToS, uniformToS')
 import Erl.Test.EUnit (TestF, TestSet, collectTests, suite, test)
 import Erl.TestHelpers (checkUnsafeCrash)
 import Partial.Unsafe (unsafeCrashWith)
@@ -28,13 +28,37 @@ randTests = do
   suite "RandTests" do
     test "bytes" do
       unsafeRunProcessM $ liftEffect do
-        actual <- bytes 10
+        actual <- unsafeFromJust "Range is valid" <$> bytes 10
         assertEqual { expected: 10, actual: byteSize actual }
+        actual2 <- bytes (-1)
+        assertEqual { expected: Nothing, actual: actual2 }
     test "bytesS" do
       unsafeRunProcessM $ liftEffect do
         rs :: RandState <- seed (Exsss)
-        let actual = fst $ bytesS 20 rs
-        assertEqual { expected: 20, actual: byteSize actual }
+        let 
+          actual1 = unsafeFromJust "Range is valid" $ bytesS 20 rs
+          actual2 = bytesS (-1) $ snd actual1
+        assertEqual { expected: 20, actual: byteSize $ fst actual1 }
+        assertTrue $ isNothing actual2
+    test "bytes'" do
+      unsafeRunProcessM $ liftEffect do
+        actual1 <- bytes' 5
+        assertEqual { expected: 5, actual: byteSize actual1 }
+        actual2 <- bytes' 0
+        assertEqual { expected: 0, actual: byteSize actual2 }
+        crashed <- checkCrashes $ bytes' (-1)
+        assertTrue crashed
+    test "bytesS'" do
+      unsafeRunProcessM $ liftEffect do
+        rs :: RandState <- seed (Exsss)
+        let 
+          r1 = bytesS' 1 rs
+          r2 = bytesS' 0 $ snd r1
+        assertEqual { expected: 1, actual: byteSize $ fst r1 }
+        assertEqual { expected: 0, actual: byteSize $ fst r2 }
+        crashed <- checkUnsafeCrash (\_ -> bytesS' (-1) $ snd r2)
+        assertTrue crashed
+            
     test "uniform" do
         r1 <- uniform 
         r2 <- uniform 
