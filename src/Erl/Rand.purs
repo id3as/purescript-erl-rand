@@ -20,6 +20,7 @@ module Erl.Rand
   , uniformTo'
   , uniformToS
   , uniformToS'
+  , updateProcessState
   )
   where
 
@@ -95,6 +96,12 @@ foreign import seed_impl :: Atom -> Effect RandState
 -- | Seeds random number generation with the specifed algorithm
 seed :: Alg -> Effect RandState
 seed = seed_impl <<< algToAtom
+
+foreign import updateProcessState_impl :: RandState -> Effect Foreign
+
+-- | Updates the process dictionary with the provided random generator state
+updateProcessState :: RandState -> Effect Unit
+updateProcessState rs = void $ updateProcessState_impl rs
 
 -- | Returns, for a specified integer N >= 1, a random integer uniformly distributed in the value range 1 =< X =< N and updates the state in the process dictionary.
 foreign import uniform :: Effect Number

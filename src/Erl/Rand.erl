@@ -8,6 +8,7 @@
     normal_impl/2,
     normalS_impl/3,
     seed_impl/1,
+    updateProcessState_impl/1,
     uniform/0,
     uniformS/1,
     uniformTo_impl/1,
@@ -41,6 +42,11 @@ normalS_impl(Mean, Variance, State) ->
 seed_impl(Alg) ->
     fun() ->
         rand:seed(Alg)
+    end.
+
+updateProcessState_impl(State) ->
+    fun() ->
+        rand:seed(State)
     end.
 
 uniform() ->
