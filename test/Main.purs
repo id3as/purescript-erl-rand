@@ -117,7 +117,7 @@ randTests = do
         assertTrue crashed
     test "seed and updateProcessState" do
       unsafeRunProcessM $ liftEffect do
-        let 
+        let
           exerciseAlg alg = do
             rs <- seed alg
             updateProcessState rs
@@ -128,7 +128,7 @@ randTests = do
             assertBetween 0.0 1.0 r1
             assertBetween 0.0 1.0 r2
             assertTrue $ r1 /= r2
-            assertEqual {expected: r1, actual: r3}
+            assertEqual { expected: r1, actual: r3 }
 
         exerciseAlg Exsss
         exerciseAlg Exro928ss

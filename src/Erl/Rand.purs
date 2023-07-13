@@ -21,8 +21,7 @@ module Erl.Rand
   , uniformToS
   , uniformToS'
   , updateProcessState
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -44,6 +43,7 @@ data Alg
 newtype RandState = RandState Foreign
 
 foreign import bytes_impl :: Int -> Effect Binary
+
 -- | Returns, for a specified integer N >= 0, a binary() with that number of random bytes
 bytes :: Int -> Effect (Maybe Binary)
 bytes n | n < 0 = pure Nothing
@@ -55,12 +55,13 @@ bytes' = bytes_impl
 
 -- | Returns, for a specified integer N >= 0 and a state, a binary() with that number of random bytes, and a new state
 foreign import bytesS_impl :: Int -> RandState -> Tuple2 Binary RandState
+
 bytesS :: Int -> RandState -> Maybe (Tuple2 Binary RandState)
 bytesS n _ | n < 0 = Nothing
 bytesS n rs = Just $ bytesS_impl n rs
 
 -- | Unsafe version of bytes that crashes if provided integer N < 0
-bytesS' ∷ Int → RandState ->  Tuple2 Binary RandState
+bytesS' ∷ Int → RandState -> Tuple2 Binary RandState
 bytesS' = bytesS_impl
 
 -- | Returns a standard normal deviate float (that is, the mean is 0 and the standard deviation is 1) and updates the state in the process dictionary.
@@ -69,6 +70,7 @@ foreign import normal01 :: Effect Number
 foreign import normal01S :: RandState -> Tuple2 Number RandState
 
 foreign import normal_impl :: Number -> Number -> Effect Number
+
 -- | Returns a normal N(Mean, Variance) deviate float and updates the state in the process dictionary
 normal ∷ Number -> Number -> Effect (Maybe Number)
 normal _ v | v < (0.0) = pure Nothing
@@ -88,8 +90,6 @@ normalS m v rs = Just $ normalS_impl m v rs
 -- | Unsafe version of normalS that crashes if the provided variance < 0
 normalS' :: Number -> Number -> RandState -> Tuple2 Number RandState
 normalS' = normalS_impl
-
-
 
 foreign import seed_impl :: Atom -> Effect RandState
 

@@ -56,3 +56,6 @@ clean:
 
 distclean: clean
 	rm -rf .spago _build
+
+formatPS:
+	purs-tidy format-in-place src/ test/
