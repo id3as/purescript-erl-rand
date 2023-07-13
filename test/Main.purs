@@ -11,7 +11,8 @@ import Erl.Data.Binary (byteSize)
 import Erl.Data.List (List)
 import Erl.Data.Tuple (fst, snd)
 import Erl.Process (unsafeRunProcessM)
-import Erl.Rand (Alg(..), RandState, bytes, bytes', bytesS, bytesS', normal, normal', normal01, normal01S, normalS, normalS', seed, uniform, uniformRange, uniformRangeS, uniformS, uniformTo, uniformTo', uniformToS, uniformToS', updateProcessState)
+import Erl.Rand (Alg(..), RandState, bytes, bytesS, normal, normal01, normal01S, normalS, seed, uniform, uniformRange, uniformRangeS, uniformS, uniformTo, uniformToS, updateProcessState)
+import Erl.Rand.Unsafe as Unsafe
 import Erl.Test.EUnit (TestF, TestSet, collectTests, suite, test)
 import Erl.TestHelpers (checkUnsafeCrash)
 import Partial.Unsafe (unsafeCrashWith)
@@ -38,23 +39,23 @@ randTests = do
           actual2 = bytesS (-1) $ snd actual1
         assertEqual { expected: 20, actual: byteSize $ fst actual1 }
         assertTrue $ isNothing actual2
-    test "bytes'" do
+    test "Unsafe.bytes" do
       unsafeRunProcessM $ liftEffect do
-        actual1 <- bytes' 5
+        actual1 <- Unsafe.bytes 5
         assertEqual { expected: 5, actual: byteSize actual1 }
-        actual2 <- bytes' 0
+        actual2 <- Unsafe.bytes 0
         assertEqual { expected: 0, actual: byteSize actual2 }
-        crashed <- checkCrashes $ bytes' (-1)
+        crashed <- checkCrashes $ Unsafe.bytes (-1)
         assertTrue crashed
-    test "bytesS'" do
+    test "Unsafe.bytesS" do
       unsafeRunProcessM $ liftEffect do
         rs :: RandState <- seed Exsss
         let
-          r1 = bytesS' 1 rs
-          r2 = bytesS' 0 $ snd r1
+          r1 = Unsafe.bytesS 1 rs
+          r2 = Unsafe.bytesS 0 $ snd r1
         assertEqual { expected: 1, actual: byteSize $ fst r1 }
         assertEqual { expected: 0, actual: byteSize $ fst r2 }
-        crashed <- checkUnsafeCrash (\_ -> bytesS' (-1) $ snd r2)
+        crashed <- checkUnsafeCrash (\_ -> Unsafe.bytesS (-1) $ snd r2)
         assertTrue crashed
     test "normal01" do
       r1 <- normal01
@@ -94,23 +95,23 @@ randTests = do
         assertBetween (-200.0) 0.0 $ fst r2
         assertBetween (-100.0) 100.0 $ fst r3
         assertTrue $ isNothing r4
-    test "normal'" do
-      r1 <- normal' 100.0 1.0
-      r2 <- normal' (-100.0) 1.0
-      r3 <- normal' 0.0 10.0
-      crashed <- checkCrashes $ normal' 0.0 (-0.0001)
+    test "Unsafe.normal" do
+      r1 <- Unsafe.normal 100.0 1.0
+      r2 <- Unsafe.normal (-100.0) 1.0
+      r3 <- Unsafe.normal 0.0 10.0
+      crashed <- checkCrashes $ Unsafe.normal 0.0 (-0.0001)
       assertBetween (0.0) 200.0 r1
       assertBetween (-200.0) 0.0 r2
       assertBetween (-100.0) 100.0 r3
       assertTrue $ crashed
-    test "normalS'" do
+    test "Unsafe.normalS" do
       unsafeRunProcessM $ liftEffect do
         rs :: RandState <- seed Exsss
         let
-          r1 = normalS' 100.0 1.0 rs
-          r2 = normalS' (-100.0) 1.0 $ snd r1
-          r3 = normalS' 0.0 10.0 $ snd r2
-        crashed <- checkUnsafeCrash (\_ -> normalS' 0.0 (-0.0001) $ snd r3)
+          r1 = Unsafe.normalS 100.0 1.0 rs
+          r2 = Unsafe.normalS (-100.0) 1.0 $ snd r1
+          r3 = Unsafe.normalS 0.0 10.0 $ snd r2
+        crashed <- checkUnsafeCrash (\_ -> Unsafe.normalS 0.0 (-0.0001) $ snd r3)
         assertBetween (0.0) 200.0 $ fst r1
         assertBetween (-200.0) 0.0 $ fst r2
         assertBetween (-100.0) 100.0 $ fst r3
@@ -129,7 +130,7 @@ randTests = do
             assertBetween 0.0 1.0 r2
             assertTrue $ r1 /= r2
             assertEqual { expected: r1, actual: r3 }
-
+        exerciseAlg Default
         exerciseAlg Exsss
         exerciseAlg Exro928ss
         exerciseAlg Exrop
@@ -194,23 +195,23 @@ randTests = do
         assertEqual { expected: 1, actual: fst r1 }
         assertBetween 1 2 $ fst r2
         assertTrue $ isNothing r3
-    test "uniformTo'" do
+    test "Unsafe.uniformTo" do
       unsafeRunProcessM $ liftEffect do
-        actual1 <- uniformTo' 1
+        actual1 <- Unsafe.uniformTo 1
         assertEqual { expected: 1, actual: actual1 }
-        actual2 <- uniformTo' 2
+        actual2 <- Unsafe.uniformTo 2
         assertBetween 1 2 actual2
-        crashed <- checkCrashes $ uniformTo' 0
+        crashed <- checkCrashes $ Unsafe.uniformTo 0
         assertTrue crashed
-    test "uniformToS'" do
+    test "Unsafe.uniformToS" do
       unsafeRunProcessM $ liftEffect do
         rs :: RandState <- seed Exsss
         let
-          r1 = uniformToS' 1 rs
-          r2 = uniformToS' 2 $ snd r1
+          r1 = Unsafe.uniformToS 1 rs
+          r2 = Unsafe.uniformToS 2 $ snd r1
         assertEqual { expected: 1, actual: fst r1 }
         assertBetween 1 2 $ fst r2
-        crashed <- checkUnsafeCrash (\_ -> uniformToS' 0 $ snd r2)
+        crashed <- checkUnsafeCrash (\_ -> Unsafe.uniformToS 0 $ snd r2)
         assertTrue crashed
 
 --------------------------------------------------------------------------------
